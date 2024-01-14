@@ -3,4 +3,4 @@ from dataclasses import dataclass
 
 @dataclass
 class Level:
-    level_name: str
+    level_id: int

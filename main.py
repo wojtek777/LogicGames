@@ -1,6 +1,6 @@
 import sys
 import pygame
-import settings
+import settings as sets
 
 
 class Button(pygame.sprite.Sprite):
@@ -29,12 +29,12 @@ about_font = pygame.font.Font('Graphics/BigSpace.ttf', 50)
 about_text = about_font.render(
     'Logic Games v0.1 - created to provide',
     True,
-    'gray'
+    'gray44'
 )
 about_text2 = about_font.render(
     'some basic training in math and logic games',
     True,
-    'gray'
+    'gray44'
 )
 screen.fill('cyan3')
 game_music = pygame.mixer.Sound('Sounds/music_game.mp3')
@@ -45,17 +45,23 @@ play_static_button = Button('Graphics/play_static.png', (520, 300))
 options_static_button = Button('Graphics/options_static.png', (520, 400))
 about_static_button = Button('Graphics/about_static.png', (520, 500))
 exit_static_button = Button('Graphics/exit_static.png', (520, 600))
+music_static_button = Button('Graphics/music_static.png', (520, 500))
 play_pressed_button = Button('Graphics/play_pressed.png', (520, 300))
 options_pressed_button = Button('Graphics/options_pressed.png', (520, 400))
 about_pressed_button = Button('Graphics/about_pressed.png', (520, 500))
 exit_pressed_button = Button('Graphics/exit_pressed.png', (520, 600))
+music_pressed_button = Button('Graphics/music_pressed.png', (520, 500))
 menu_buttons = (
     (play_pressed_button, play_static_button),
     (options_pressed_button, options_static_button),
     (about_pressed_button, about_static_button),
     (exit_pressed_button, exit_static_button)
 )
-settings_buttons = {}
+settings_buttons = (
+    (music_pressed_button, music_static_button),
+    (exit_pressed_button, exit_static_button),
+)
+settings_set = {music_pressed_button, exit_static_button}
 menu_set = {play_pressed_button, options_static_button, about_static_button, exit_static_button}
 buttons.add(*menu_set)
 selected_button = 0
@@ -79,14 +85,18 @@ active_level = {
 
 while True:
     pygame.display.update()
+    if sets.Settings.get_music_setting():
+        game_music.set_volume(0.7)
+    else:
+        game_music.set_volume(0)
     screen.fill('cyan3')
-    if active_level['menu'] == 1:
+    if active_level['menu']:
         display_menu()
-    elif active_level['about'] == 1:
-        buttons.empty()
-        buttons.add(exit_pressed_button)
+    elif active_level['about']:
         screen.blit(about_text, (160, 60))
         screen.blit(about_text2, (160, 100))
+        display_menu()
+    elif active_level['settings']:
         display_menu()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -95,13 +105,11 @@ while True:
         if event.type == pygame.KEYDOWN and active_level['about'] == 1:
             if event.key == pygame.K_RETURN:
                 buttons.empty()
-                screen.fill('cyan3')
                 buttons.add(*menu_set)
                 active_level.update({'menu': 1, 'about': 0})
                 selected_button = 0
         elif event.type == pygame.KEYDOWN and active_level['menu'] == 1:
             if event.key == pygame.K_DOWN:
-                screen.fill('cyan3')
                 buttons.remove(menu_buttons[selected_button][0])
                 buttons.add(menu_buttons[selected_button][1])
                 selected_button += 1
@@ -109,20 +117,38 @@ while True:
                 buttons.add(menu_buttons[selected_button][0])
                 buttons.remove(menu_buttons[selected_button][1])
             if event.key == pygame.K_UP:
-                screen.fill('cyan3')
-                menu_buttons[selected_button][0].destroy()
                 buttons.remove(menu_buttons[selected_button][0])
                 buttons.add(menu_buttons[selected_button][1])
                 selected_button += 3
                 selected_button %= 4
                 buttons.add(menu_buttons[selected_button][0])
-                menu_buttons[selected_button][1].destroy()
                 buttons.remove(menu_buttons[selected_button][1])
             if event.key == pygame.K_RETURN:
                 if selected_button == 3:
                     pygame.quit()
                     sys.exit(0)
+                elif selected_button == 1:
+                    active_level.update({'menu': 0, 'settings': 1})
+                    buttons.empty()
+                    buttons.add(*settings_set)
                 elif selected_button == 2:
                     active_level.update({'menu': 0, 'about': 1})
+                    buttons.empty()
                     buttons.add(exit_pressed_button)
-            # buttons.empty()
+                selected_button = 0
+        elif event.type == pygame.KEYDOWN and active_level['settings'] == 1:
+            if event.key == pygame.K_DOWN or event.key == pygame.K_UP:
+                buttons.remove(settings_buttons[selected_button][0])
+                buttons.add(settings_buttons[selected_button][1])
+                selected_button += 1
+                selected_button %= 2
+                buttons.add(settings_buttons[selected_button][0])
+                buttons.remove(settings_buttons[selected_button][1])
+            if event.key == pygame.K_RETURN:
+                if selected_button == 1:
+                    active_level.update({'menu': 1, 'settings': 0})
+                    buttons.empty()
+                    buttons.add(*menu_set)
+                    selected_button = 0
+                else:
+                    sets.Settings.change_music_setting()
