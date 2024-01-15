@@ -1,6 +1,7 @@
 import sys
 import pygame
 import settings as sets
+import quests
 
 
 class Button(pygame.sprite.Sprite):
@@ -76,6 +77,7 @@ settings_set = {music_pressed_button, exit_static_button}
 menu_set = {play_pressed_button, options_static_button, about_static_button, exit_static_button}
 buttons.add(*menu_set)
 selected_button = 0
+basic_quests = quests.Quests()
 
 active_level = {
     'menu': 1,
