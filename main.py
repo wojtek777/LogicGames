@@ -2,10 +2,12 @@ import sys
 import pygame
 import settings as sets
 import quests
-import random
 import time
 
 
+# Abstract Factory design pattern - superior Sprite class won't manage Sprite objects anymore,
+# from now Button factory class takes over restructuring types of objects that serve as
+# buttons displayed on the screen - other interactive sprites will be specified in other components
 class Button(pygame.sprite.Sprite):
     def __init__(self, path: str, bottom_left_pos):
         super().__init__()
@@ -72,6 +74,11 @@ screen.fill('cyan3')
 game_music = pygame.mixer.Sound('Sounds/music_game.mp3')
 game_music.play(loops=-1)
 game_music.set_volume(0.7)
+###
+# Flyweight design pattern - buttons objects are flyweights kept and shared
+# through this sprite group to allow to easy manage sprites on the screen,
+# each object is small and needs to be effectively managed to avoid game lagging,
+# also allows to easily compose more buttons added in the future
 buttons = pygame.sprite.Group()
 play_static_button = Button('Graphics/play_static.png', (520, 300))
 options_static_button = Button('Graphics/options_static.png', (520, 400))
@@ -157,7 +164,8 @@ def enter_game_over():
         'game_over': 1
     })
     buttons.empty()
-    time.sleep(2.5)
+    time.sleep(2.2)
+
 
 while True:
     pygame.display.update()
